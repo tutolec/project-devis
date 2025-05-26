@@ -24,13 +24,18 @@ async function sendToWebhook(formData: CustomFormData) {
       throw new Error(`Erreur Webhook: ${response.statusText}`);
     }
 
+    // Check if the response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Webhook response is not JSON:', await response.text());
+      return null;
+    }
+
     try {
       const data = await response.json();
       return data.pdfUrl;
     } catch (parseError) {
       console.error('Failed to parse webhook response:', parseError);
-      const responseText = await response.text();
-      console.error('Response text:', responseText);
       return null;
     }
   } catch (error) {
