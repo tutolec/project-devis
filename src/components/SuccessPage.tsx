@@ -1,14 +1,30 @@
 import { CheckCircle, Copy, Home, FileDown } from 'lucide-react';
 import type { FormData } from '../lib/types';
+import { generatePDF } from '../services/pdfService';
+import { useState, useEffect } from 'react';
 
 interface SuccessPageProps {
   formPassword: string;
   onReset: () => void;
   formData: FormData;
-  pdfUrl?: string; // Ajout de l'URL du PDF comme prop
 }
 
-export function SuccessPage({ formPassword, onReset, pdfUrl }: SuccessPageProps) {
+export function SuccessPage({ formPassword, onReset, formData }: SuccessPageProps) {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const generatePdfDocument = async () => {
+      try {
+        const pdfData = await generatePDF(formData);
+        setPdfUrl(pdfData);
+      } catch (error) {
+        console.error('Erreur lors de la génération du PDF:', error);
+      }
+    };
+
+    generatePdfDocument();
+  }, [formData]);
+
   const handleCopyPassword = () => {
     navigator.clipboard.writeText(formPassword);
   };
@@ -54,15 +70,14 @@ export function SuccessPage({ formPassword, onReset, pdfUrl }: SuccessPageProps)
             {pdfUrl ? (
               <a
                 href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                download="devis-tutolec.pdf"
                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 w-full sm:w-auto"
               >
                 <FileDown className="h-5 w-5 mr-2" />
                 Télécharger le PDF
               </a>
             ) : (
-              <p className="text-gray-500">Le PDF est en cours de génération...</p>
+              <p className="text-gray-500">Génération du PDF en cours...</p>
             )}
 
             <button
