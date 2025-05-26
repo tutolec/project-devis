@@ -1,7 +1,6 @@
-
 /**
  * @file types.ts
- * Fichier de définition des types et interfaces pour l’application.
+ * Fichier de définition des types et interfaces pour l'application.
  */
 
 // Liste étendue des types de devices possibles
@@ -10,14 +9,20 @@ export type DeviceType =
   | "prise-classique"
   | "prise-rj45"
   | "prise-tv"
+  | "prise-etanche"
 
   // Éclairage
   | "point-lumineux-dcl"
+  | "point-lumineux-applique"
   | "spot"
-  | "alimentation-eclairage"
+  | "spot-recouvrable"
+  | "spot-douche"
+  | "projecteur-exterieur"
+  | "projecteur-detecteur"
 
   // Commandes
-  | "interrupteur"
+  | "interrupteur-va-et-vient"
+  | "interrupteur-etanche"
   | "bouton-poussoir"
 
   // Spécialisées
@@ -27,31 +32,24 @@ export type DeviceType =
   | "lave-linge"
   | "plaque-de-cuisson"
   | "chauffe-eau"
-  | "Sèche-linge"
-  | "Congélateur";
+  | "seche-linge"
+  | "congelateur";
 
 /**
  * Types spécifiques au projet
  */
 
-// Par exemple, si vous gardez la notion de LightingType dans vos sélecteurs
 export type LightingType =
   | "Point lumineux DCL"
-  | "Spots recouvrable tout isolant"
+  | "Point lumineux applique DCL"
   | "Spots"
+  | "Spots recouvrable tout isolant"
   | "Spot douche"
-  | "DCL applique"
-  | "Alimentation éclairage"
   | "Projecteur étanche"
   | "Projecteur étanche avec détecteur";
 
-// Même principe pour les blocs de prises
 export type OutletBlockType = "simple" | "double" | "triple" | "quadruple";
 
-/**
- * Liste des prises spécialisées (anciennement `SpecializedOutletType`).
- * On peut l’utiliser pour gérer le select des prises spécialisées.
- */
 export type SpecializedOutletType =
   | "Hotte"
   | "Four"
@@ -62,11 +60,6 @@ export type SpecializedOutletType =
   | "Plaque de cuisson"
   | "Chauffe-eau";
 
-/**
- * Interface d’un éclairage basique (Lighting)
- * avec un champ `customName` pour le nom personnalisé,
- * et `detectors?` pour gérer le nombre de détecteurs.
- */
 export interface Lighting {
   id: string;
   type: LightingType;
@@ -76,29 +69,19 @@ export interface Lighting {
   detectors?: number;
 }
 
-/**
- * Interface d’un bloc de prises.
- * Prises (outlets), rj45, tv.
- */
 export interface OutletBlock {
   id: string;
-  type: OutletBlockType; // ex. 'simple'
-  outlets: number;       // nombre de prises classiques
-  rj45: number;          // nombre de RJ45
-  tv: number;            // nombre de prises TV
+  type: OutletBlockType;
+  outlets: number;
+  rj45: number;
+  tv: number;
 }
 
-/**
- * Exemple de structure plus générique pour regrouper des devices
- * (non utilisée directement dans l’exemple App.tsx,
- *  mais potentiellement utile si vous voulez unifier éclairages/prises/etc.)
- */
 export interface DeviceInBlock {
-  id: string;             // ID unique
-  deviceType: DeviceType; // Type parmi la liste ci-dessus
-  quantity: number;       // nombre d'items (prises, spots, etc.)
-  customName?: string;    // nom personnalisable
-  // Autres champs si besoin (ex. intensité, détecteurs, etc.)
+  id: string;
+  deviceType: DeviceType;
+  quantity: number;
+  customName?: string;
 }
 
 export interface EquipmentBlock {
@@ -107,12 +90,6 @@ export interface EquipmentBlock {
   devices: DeviceInBlock[];
 }
 
-/**
- * Chaque pièce (Room) contient un `equipment` qui lui-même contient
- * - un tableau d’éclairages
- * - un tableau de blocs de prises
- * - un tableau de prises spécialisées
- */
 export interface Room {
   id: string;
   name: string;
@@ -123,9 +100,6 @@ export interface Room {
   };
 }
 
-/**
- * Structure du formulaire global :
- */
 export interface FormData {
   typeOfWork: string;
   surfaceArea: string;
@@ -137,6 +111,17 @@ export interface FormData {
   phone: string;
 }
 
-/**
- * Fin du fichier types.ts
- */
+export interface MaterialPrice {
+  name: string;
+  price: number;
+}
+
+export interface QuoteCalculation {
+  materials: {
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }[];
+  totalPrice: number;
+}

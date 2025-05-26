@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
-import type { CustomFormData } from '../lib/types';
+import { calculateQuote } from './quoteService';
+import type { FormData } from '../lib/types';
 
 function generateUniquePassword(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -10,21 +11,23 @@ function generateUniquePassword(): string {
   return password;
 }
 
-async function sendToWebhook(formData: CustomFormData) {
+async function sendToWebhook(formData: FormData, quoteCalculation: any) {
   try {
     const response = await fetch('https://hook.eu2.make.com/dvtignppd733ifsyeol97qgculx4n5fq', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        ...formData,
+        quoteCalculation
+      }),
     });
 
     if (!response.ok) {
       throw new Error(`Erreur Webhook: ${response.statusText}`);
     }
 
-    // Check if the response is JSON
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       console.error('Webhook response is not JSON:', await response.text());
@@ -44,20 +47,13 @@ async function sendToWebhook(formData: CustomFormData) {
   }
 }
 
-export async function saveForm(formData: CustomFormData) {
+export async function saveForm(formData: FormData) {
   try {
     const userId = null;
 
     if (
       !formData.typeOfWork ||
-      !formData.lodgingType ||
-      !formData.department ||
       !formData.surfaceArea ||
-      !formData.disjoncteurLocation ||
-      !formData.highTensionLine ||
-      !formData.tableauType ||
-      !formData.aluminumJoinery ||
-      !formData.vmcNeeded ||
       !formData.firstName ||
       !formData.lastName ||
       !formData.email ||
@@ -67,27 +63,20 @@ export async function saveForm(formData: CustomFormData) {
     }
 
     const formPassword = generateUniquePassword();
+    const quoteCalculation = calculateQuote(formData.rooms);
 
     const { data: insertedForm, error: formError } = await supabase
       .from('construction_forms')
       .insert({
         user_id: userId,
         type_of_work: formData.typeOfWork,
-        lodging_type: formData.lodgingType,
-        department: formData.department,
         surface_area: formData.surfaceArea,
-        disjoncteur_location: formData.disjoncteurLocation,
-        high_tension_line: formData.highTensionLine,
-        tableau_type: formData.tableauType,
-        aluminum_joinery: formData.aluminumJoinery,
-        vmc_needed: formData.vmcNeeded,
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        heating_types: formData.heatingTypes,
-        equipment: formData.equipment,
         form_password: formPassword,
+        quote_calculation: quoteCalculation
       })
       .select()
       .single();
@@ -97,9 +86,9 @@ export async function saveForm(formData: CustomFormData) {
       throw new Error('Erreur lors de la création du formulaire');
     }
 
-    const pdfUrl = await sendToWebhook(formData);
+    const pdfUrl = await sendToWebhook(formData, quoteCalculation);
 
-    return { ...insertedForm, formPassword, pdfUrl };
+    return { ...insertedForm, formPassword, pdfUrl, quoteCalculation };
   } catch (error) {
     console.error('Erreur lors de la sauvegarde du formulaire:', error);
     if (error instanceof Error) {
