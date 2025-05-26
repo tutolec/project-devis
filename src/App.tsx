@@ -763,7 +763,7 @@ function App() {
                         Alimentation éclairage
                       </option>
                       <option value="Projecteur étanche">Projecteur étanche</option>
-                      <option value="Projecteur étanche avec détecteur">Projecteur étanche avec détecteur</option>
+                      <option value="Projecteur étanche">Projecteur étanche avec détecteur</option>
                     </>
                   ) : (
                     <>
