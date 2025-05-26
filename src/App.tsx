@@ -17,10 +17,21 @@ import {
   Trash2
 } from 'lucide-react';
 
+// Import the new helper functions
+import type {
+  FormData as FormDataType,
+  Room,
+  Lighting,
+  SpecializedOutletType,
+  OutletBlock,
+  LightingType
+} from './lib/types';
+import { getLightingOptionsForRoom } from './lib/types';
+
 // Composant de page de succès
 import { SuccessPage } from './components/SuccessPage';
 
-// Service d’enregistrement du formulaire (exemple)
+// Service d'enregistrement du formulaire (exemple)
 import { saveForm } from './services/formService';
 
 // Import des types nécessaires
@@ -36,7 +47,7 @@ import type {
    1. Interfaces supplémentaires et état initial
    ------------------------------------------------------------------------- */
 
-// Exemple de type pour détailler le type d’interrupteur si besoin
+// Exemple de type pour détailler le type d'interrupteur si besoin
 type SwitchType =
   | 'va-et-vient'
   | 'poussoir'
@@ -46,11 +57,11 @@ type SwitchType =
 
 /**
  * Exemple de type "CustomLighting" si vous avez besoin
- * d’étendre `Lighting` avec plus de champs (ex. switchTypes).
+ * d'étendre `Lighting` avec plus de champs (ex. switchTypes).
  */
 interface CustomLighting extends Lighting {
   // Nombre de détecteurs est déjà dans Lighting (detectors?).
-  // On peut ajouter un tableau de type d’interrupteurs :
+  // On peut ajouter un tableau de type d'interrupteurs :
   switchTypes?: SwitchType[];
 }
 
@@ -129,7 +140,7 @@ const addableRoomTypes = [
 ];
 
 /* -------------------------------------------------------------------------
-   3. Génération d’ID et création de pièces par défaut
+   3. Génération d'ID et création de pièces par défaut
    ------------------------------------------------------------------------- */
 
 /** Génère un ID unique très simple */
@@ -140,12 +151,12 @@ function genId() {
 /**
  * Crée une pièce avec la configuration par défaut
  * (éclairages, blocs de prises, prises spécialisées).
- * On ajoute ici `customName` pour nommer l’éclairage par défaut.
+ * On ajoute ici `customName` pour nommer l'éclairage par défaut.
  */
 function createRoomWithDefaults(roomName: string): Room {
   const ln = roomName.trim().toLowerCase();
 
-  // Par défaut, on initialise trois tableaux (à l’intérieur d’un objet `equipment`).
+  // Par défaut, on initialise trois tableaux (à l'intérieur d'un objet `equipment`).
   const lighting: CustomLighting[] = [];
   const outletBlocks: OutletBlock[] = [];
   const specializedOutlets: SpecializedOutletType[] = [];
@@ -323,19 +334,19 @@ const initialFormData: CustomFormData = {
    5. Composant principal App
    ------------------------------------------------------------------------- */
 function App() {
-  // On passe de l’étape 1 à l’étape 8
+  // On passe de l'étape 1 à l'étape 8
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<CustomFormData>(initialFormData);
   const [submitSuccess, setSubmitSuccess] = useState<{ formPassword: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pour l’étape 4 : gestion de l'ajout de pièce
+  // Pour l'étape 4 : gestion de l'ajout de pièce
   const [newRoomType, setNewRoomType] = useState('');
   const [customRoomName, setCustomRoomName] = useState('');
 
   /* -----------------------------------------------------------------------
-     5.1 Vérification qu’on peut passer à l’étape suivante
+     5.1 Vérification qu'on peut passer à l'étape suivante
      ----------------------------------------------------------------------- */
   const canProceedToNextStep = (): boolean => {
     switch (currentStep) {
@@ -388,7 +399,7 @@ function App() {
     setSubmitError(null);
 
     try {
-      // Appel à un service d’enregistrement (ex.: requête HTTP).
+      // Appel à un service d'enregistrement (ex.: requête HTTP).
       const result = await saveForm(formData);
       setSubmitSuccess({ formPassword: result.formPassword });
     } catch (error) {
@@ -408,7 +419,7 @@ function App() {
   };
 
   /* -----------------------------------------------------------------------
-     5.3 Gestion de l’ajout / suppression de pièces (étape 4)
+     5.3 Gestion de l'ajout / suppression de pièces (étape 4)
      ----------------------------------------------------------------------- */
   const handleAddRoom = () => {
     if (!newRoomType) return;
@@ -454,7 +465,7 @@ function App() {
     }));
   };
 
-  // Déplacement (haut / bas) d’une pièce dans la liste
+  // Déplacement (haut / bas) d'une pièce dans la liste
   const handleMoveRoomUp = (index: number) => {
     if (index <= 0) return;
     setFormData((prev) => {
@@ -478,7 +489,7 @@ function App() {
   };
 
   /* -----------------------------------------------------------------------
-     5.4 Fonctions d’édition de l’éclairage, des prises et des prises spécialisées
+     5.4 Fonctions d'édition de l'éclairage, des prises et des prises spécialisées
      ----------------------------------------------------------------------- */
   // Ajouter un nouvel éclairage
   const handleAddLighting = (roomId: string) => {
@@ -667,10 +678,11 @@ function App() {
   };
 
   /* -----------------------------------------------------------------------
-     5.5 Rendu d’une pièce à l’étape 4
+     5.5 Rendu d'une pièce à l'étape 4
      ----------------------------------------------------------------------- */
   const renderRoomEquipment = (room: Room, index: number) => {
     const lowerName = room.name.toLowerCase();
+    const lightingOptions = getLightingOptionsForRoom(room.name);
 
     // On masque les prises spécialisées pour WC, exterieur, garage...
     const hideSpecialized =
@@ -734,49 +746,24 @@ function App() {
                 key={customLight.id}
                 className="flex items-center gap-4 mb-3 p-3 bg-gray-50 rounded-lg"
               >
-                {/* Sélecteur de type d’éclairage */}
+                {/* Updated lighting type selector */}
                 <select
                   value={customLight.type}
                   onChange={(e) =>
                     handleUpdateLighting(room.id, customLight.id, {
-                      type: e.target.value as any
+                      type: e.target.value as LightingType
                     })
                   }
                   className="rounded-md border-gray-300 text-sm"
                 >
-                  {/* Exemple de logique : on propose un certain type si c’est la sdb, etc. */}
-                  {lowerName.includes('salle de bain') ? (
-                    <>
-                      <option value="Point lumineux DCL">Point lumineux DCL</option>
-                      <option value="DCL applique">DCL applique</option>
-                      <option value="Spots recouvrable isolant">
-                        Spots recouvrable isolant
-                      </option>
-                      <option value="Spot douche">Spot douche</option>
-                      <option value="Spots">Spots</option>
-                    </>
-                  ) : lowerName.includes('garage') ||
-                    lowerName.includes('terrasse') ||
-                    lowerName.includes('exterieur') ? (
-                    <>
-                      <option value="Alimentation éclairage">
-                        Alimentation éclairage
-                      </option>
-                      <option value="Projecteur étanche">Projecteur étanche</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Point lumineux DCL">Point lumineux DCL</option>
-                      <option value="DCL applique">DCL applique</option>
-                      <option value="Spots recouvrable isolant">
-                        Spots recouvrable isolant
-                      </option>
-                      <option value="Spots">Spots</option>
-                    </>
-                  )}
+                  {lightingOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
                 </select>
 
-                {/* Quantité (ex. si on veut plusieurs points lumineux identiques) */}
+                {/* Quantity controls */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() =>
@@ -801,7 +788,7 @@ function App() {
                   </button>
                 </div>
 
-                {/* Nombre d’interrupteurs ou BP */}
+                {/* Switches controls */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm">
                     {customLight.switches > 2 ? 'Boutons poussoirs:' : 'Interrupteurs:'}
@@ -829,7 +816,7 @@ function App() {
                   </button>
                 </div>
 
-                {/* Détecteurs */}
+                {/* Detectors controls */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm">Détecteurs:</span>
                   <button
@@ -855,7 +842,7 @@ function App() {
                   </button>
                 </div>
 
-                {/* Nom personnalisable (customName) */}
+                {/* Custom name input */}
                 <div className="flex-1">
                   <input
                     type="text"
@@ -870,7 +857,7 @@ function App() {
                   />
                 </div>
 
-                {/* Bouton de suppression */}
+                {/* Remove button */}
                 <button
                   onClick={() => handleRemoveLighting(room.id, customLight.id)}
                   className="ml-auto text-red-500 hover:bg-red-50 p-2 rounded"
@@ -996,7 +983,7 @@ function App() {
           ))}
         </div>
 
-        {/* Prises spécialisées (on les masque si c’est un WC, garage, etc.) */}
+        {/* Prises spécialisées (on les masque si c'est un WC, garage, etc.) */}
         {hideSpecialized ? null : (
           <div>
             <h4 className="text-lg font-medium mb-3">Prises spécialisées</h4>
@@ -1056,10 +1043,10 @@ function App() {
   };
 
   /* -----------------------------------------------------------------------
-     5.6 Rendu de l’étape 6 : Synthèse
+     5.6 Rendu de l'étape 6 : Synthèse
      ----------------------------------------------------------------------- */
 
-  // Petite fonction utilitaire pour raccourcir le type d’éclairage dans la synthèse
+  // Petite fonction utilitaire pour raccourcir le type d'éclairage dans la synthèse
   function getShortLightingType(type: string): string {
     switch (type) {
       case 'Point lumineux DCL':
@@ -1081,7 +1068,7 @@ function App() {
           Synthèse du logement
         </h2>
         {formData.rooms.map((room) => {
-          // S’il n’y a rien dans la pièce, on ne l’affiche pas
+          // S'il n'y a rien dans la pièce, on ne l'affiche pas
           const hasLighting = room.equipment.lighting && room.equipment.lighting.length > 0;
           const hasOutletBlocks =
             room.equipment.outletBlocks && room.equipment.outletBlocks.length > 0;
@@ -1091,7 +1078,7 @@ function App() {
             return null;
           }
 
-          // Compter le nombre d’occurrences par type d’éclairage
+          // Compter le nombre d'occurrences par type d'éclairage
           const countPerType: Record<string, number> = {};
 
           return (
@@ -1149,7 +1136,7 @@ function App() {
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Blocs de prises</h4>
                   {room.equipment.outletBlocks.map((block, bIndex) => {
-                    // On n’affiche pas le bloc s’il est entièrement vide
+                    // On n'affiche pas le bloc s'il est entièrement vide
                     if (block.outlets === 0 && block.rj45 === 0 && block.tv === 0) {
                       return null;
                     }
@@ -1616,6 +1603,7 @@ function App() {
                                 }
                               }))
                             }
+                          
                           />
                         </div>
                       </div>
@@ -1688,7 +1676,7 @@ function App() {
                   <p className="text-gray-700 mb-2">
                     Vous disposez déjà des 5 pièces par défaut (Cuisine, Salon, Salle de bain, WC, Chambre).
                     <br />
-                    Vous pouvez en ajouter d’autres ci-dessous :
+                    Vous pouvez en ajouter d'autres ci-dessous :
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <select
@@ -1966,7 +1954,7 @@ function App() {
                 </button>
               )}
 
-              {/* Si on est à l’étape 7, on propose l’envoi du formulaire */}
+              {/* Si on est à l'étape 7, on propose l'envoi du formulaire */}
               {currentStep === 7 && !submitSuccess && (
                 <button
                   type="submit"
