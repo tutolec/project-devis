@@ -757,7 +757,7 @@ function App() {
                     </>
                   ) : lowerName.includes('garage') ||
                     lowerName.includes('terrasse') ||
-                    lowerName.includes('exterieur') ? (
+                    lowerName.includes('extérieur') ? (
                     <>
                       <option value="Alimentation éclairage">
                         Alimentation éclairage
