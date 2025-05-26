@@ -113,7 +113,7 @@ export async function generatePDF(formData: FormData): Promise<string> {
     );
     
     doc.text(
-      'Ce devis est valable 30 jours à compter de la date d'émission.',
+      'Ce devis est valable 30 jours à compter de la date d\'émission.',
       margin,
       doc.internal.pageSize.height - margin
     );
