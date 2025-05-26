@@ -80,7 +80,7 @@ export async function saveForm(formData: CustomFormData) {
         high_tension_line: formData.highTensionLine,
         tableau_type: formData.tableauType,
         aluminum_joinery: formData.aluminumJoinery,
-        vmc_needed: formData.vmcNeeded, // Updated to use vmc_needed instead of vmc_power
+        vmc_needed: formData.vmcNeeded,
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
