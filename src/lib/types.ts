@@ -36,7 +36,7 @@ export type DeviceType =
 // Par exemple, si vous gardez la notion de LightingType dans vos sélecteurs
 export type LightingType =
   | "Point lumineux DCL"
-  | "Spots recouvrable isolant"
+  | "Spots recouvrable tout isolant"
   | "Spots"
   | "Spot douche"
   | "DCL applique"
