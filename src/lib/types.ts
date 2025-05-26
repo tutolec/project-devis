@@ -1,3 +1,4 @@
+
 /**
  * @file types.ts
  * Fichier de définition des types et interfaces pour l’application.
@@ -41,7 +42,8 @@ export type LightingType =
   | "Spot douche"
   | "DCL applique"
   | "Alimentation éclairage"
-  | "Projecteur étanche";
+  | "Projecteur étanche"
+  | "Projecteur étanche avec détecteur";
 
 // Même principe pour les blocs de prises
 export type OutletBlockType = "simple" | "double" | "triple" | "quadruple";
