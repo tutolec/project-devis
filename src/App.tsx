@@ -749,8 +749,8 @@ function App() {
                     <>
                       <option value="Point lumineux DCL">Point lumineux DCL</option>
                       <option value="DCL applique">DCL applique</option>
-                      <option value="Spots recouvrable isolant">
-                        Spots recouvrable isolant
+                      <option value="Spots recouvrable tout isolant">
+                        Spots recouvrable tout isolant
                       </option>
                       <option value="Spot douche">Spot douche</option>
                       <option value="Spots">Spots</option>
@@ -769,8 +769,8 @@ function App() {
                     <>
                       <option value="Point lumineux DCL">Point lumineux DCL</option>
                       <option value="DCL applique">DCL applique</option>
-                      <option value="Spots recouvrable isolant">
-                        Spots recouvrable isolant
+                      <option value="Spots recouvrable tout isolant">
+                        Spots recouvrable tout isolant
                       </option>
                       <option value="Spots">Spots</option>
                     </>
@@ -1067,7 +1067,7 @@ function App() {
         return 'PL DCL';
       case 'DCL applique':
         return 'Applique';
-      case 'Spots recouvrable isolant':
+      case 'Spots recouvrable tout isolant':
       case 'Spots':
         return 'Spots';
       default:
