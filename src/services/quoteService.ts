@@ -58,7 +58,9 @@ export function calculateQuote(rooms: Room[]): QuoteCalculation {
       if (light.switches > 0) {
         addMaterial('Interrupteur va-et-vient', light.switches);
         // Each switch needs mounting components
-        light.switches.forEach(() => addMountingComponents(1));
+        for (let i = 0; i < light.switches; i++) {
+          addMountingComponents(1);
+        }
       }
     });
 
